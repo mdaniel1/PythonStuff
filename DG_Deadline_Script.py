@@ -13,6 +13,14 @@ data["filepath"] = ""
 root = Tkinter.Tk()
 root.withdraw()
 
+def getFramesForJob(job):
+    if "BATCHER" in job.JobName:
+        return job.JobFrames
+    else:
+        frames = job.JobFrames.split("-")
+        framesNum = int(frames[1])-int(frames[0])
+        return framesNum
+
 def formatJobTitle(jobName, epNumber, jobComment):
     shotNumber = ""
     lines = jobName.split(" ")
@@ -57,7 +65,7 @@ def fixPreComp(job):
     job.SetJobEnvironmentKeyValue("foundry_LICENSE", "4101@192.168.124.249")
     RepositoryUtils.SaveJob(job)
 
-def writeToFile(logFile, jobName, episode, jobComment, jobId, jobTotalTaskRenderTime, jobAVGFrameTime):
+def writeToFile(logFile, jobName, episode, jobComment, jobId, jobTotalTaskRenderTime, jobAVGFrameTime, frames):
     #print("Writing stats to file...")
     logFile.write("######" + formatJobTitle(jobName, episode, jobComment) + " ("+ jobId +")######")
     logFile.write("\n")
@@ -65,7 +73,10 @@ def writeToFile(logFile, jobName, episode, jobComment, jobId, jobTotalTaskRender
     logFile.write("\n")
     logFile.write("Average frame time : \t\t" + jobAVGFrameTime)
     logFile.write("\n")
+    logFile.write("Frames : \t\t\t" + str(frames))
     logFile.write("\n")
+    logFile.write("\n")
+
 
 def updateFile(episode, shot=""):
     data["file"]= data["date"]+"_"+episode+"_"+shot+".txt"
@@ -95,7 +106,8 @@ def __main__():
         print("4) Change output stat file directory")
         print("5) Fix BATCHER environment variables")
         print("6) Fix PreComp environment variables")
-        print("7) Help")
+        print("7) Remove 64GB Limit for layerCharsHair jobs")
+        print("8) Help")
         print("9) Quit")
         print("\n")
         choice = int(input("Choice : "))
@@ -120,9 +132,10 @@ def __main__():
                         stats = JobUtils.CalculateJobStatistics(job, tasks)
                         jobAVGFrameTime = stats.AverageFrameTimeAsString
                         jobAVGFrameTime = formatTime(jobAVGFrameTime)
+                        frames = getFramesForJob(job)
                         jobTotalTaskRenderTime = stats.TotalTaskRenderTimeAsString
                         jobTotalTaskRenderTime = formatTime(jobTotalTaskRenderTime)
-                        writeToFile(logFile, jobName, episode, job.JobComment, job.JobId, jobTotalTaskRenderTime, jobAVGFrameTime)
+                        writeToFile(logFile, jobName, episode, job.JobComment, job.JobId, jobTotalTaskRenderTime, jobAVGFrameTime, frames)
                 print("Done.\n")
                 logFile.close()
                 updateFile(episode)
@@ -147,7 +160,8 @@ def __main__():
                     jobAVGFrameTime = formatTime(jobAVGFrameTime)
                     jobTotalTaskRenderTime = stats.TotalTaskRenderTimeAsString
                     jobTotalTaskRenderTime = formatTime(jobTotalTaskRenderTime)
-                    writeToFile(logFile, jobName, episode, job.JobComment, job.JobId, jobTotalTaskRenderTime, jobAVGFrameTime)
+                    frames = getFramesForJob(job)
+                    writeToFile(logFile, jobName, episode, job.JobComment, job.JobId, jobTotalTaskRenderTime, jobAVGFrameTime, frames)
             print("Done.\n")
             logFile.close()
             os.system("pause")
@@ -171,8 +185,7 @@ def __main__():
             for job in RepositoryUtils.GetJobs(True):
                 jobName = job.JobName
                 if (episode in jobName or episode in job.JobComment) and "BATCHER" in jobName:
-                    print("(DEBUG) found job " + jobName)
-                    jobId = job.JobId
+                    print("found job " + jobName)
                     job = RepositoryUtils.GetJob(job.JobId, True)
                     fixBATCHER(job)
             print("Done.")
@@ -181,13 +194,27 @@ def __main__():
             for job in RepositoryUtils.GetJobs(True):
                 jobName = job.JobName
                 if (episode in jobName or episode in job.JobComment) and "preComp" in jobName:
-                    print("(DEBUG) found job " + jobName)
-                    jobId = job.JobId
+                    print("found job " + jobName)
                     job = RepositoryUtils.GetJob(job.JobId, True)
                     fixPreComp(job)
             print("Done.")
             os.system("pause")
         elif choice == 7:
+            for job in RepositoryUtils.GetJobs(True):
+                if "VRAY_RENDER_layerCharsHair" in job.JobName:
+                    job = RepositoryUtils.GetJob(job.JobId, True)
+                    limit = list()
+                    limit.append("vray4maya")
+                    limit.append("64g")
+                    job.SetJobLimitGroups(limit)
+                    RepositoryUtils.SaveJob(job)
+                    #limits = job.JobLimitGroups
+                    #for line in limits:
+                    #    print("(DEBUG) limit : " + line)
+            print("Done")
+            os.system("pause")
+
+        elif choice == 8:
             os.system("cls")
             print("When prompted for episode or shot numbers, only enter the number (119 instead of ep119 or 1 instead of sh0001 for example)")
             print("By default, stat files are located in " + os.environ['USERPROFILE'] + "\\Documents\\")
