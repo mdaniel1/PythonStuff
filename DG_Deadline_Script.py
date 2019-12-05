@@ -106,9 +106,10 @@ def __main__():
         print("4) Change output stat file directory")
         print("5) Fix BATCHER environment variables")
         print("6) Fix PreComp environment variables")
-        print("7) Remove 64GB Limit for layerCharsHair jobs")
-        print("8) Help")
-        print("9) Quit")
+        print("7) Remove 64 GB Limit for a layerCharsHair job in a shot")
+        print("8) Remove 64GB Limit for a layerCharsHair job in all shots")
+        print("9) Help")
+        print("10) Quit")
         print("\n")
         choice = int(input("Choice : "))
 
@@ -200,12 +201,29 @@ def __main__():
             print("Done.")
             os.system("pause")
         elif choice == 7:
+            try:
+                number = int(input("Shot number : "))
+                shot = "sh"+"{:04d}".format(number)
+                for job in RepositoryUtils.GetJobs(True):
+                    jobName = job.JobName
+                    if shot in jobName and "VRAY_RENDER_layerCharsHair" in jobName:
+                        job = RepositoryUtils.GetJob(job.JobId, True)
+                        limit = list()
+                        limit.append("vray4maya")
+                        job.SetJobLimitGroups(limit)
+                        RepositoryUtils.SaveJob(job)
+                        
+                print("Done.\n")
+                os.system("pause")
+            except:
+                print("Not a number")
+                os.system("pause")
+        elif choice == 8:
             for job in RepositoryUtils.GetJobs(True):
                 if "VRAY_RENDER_layerCharsHair" in job.JobName:
                     job = RepositoryUtils.GetJob(job.JobId, True)
                     limit = list()
                     limit.append("vray4maya")
-                    limit.append("64g")
                     job.SetJobLimitGroups(limit)
                     RepositoryUtils.SaveJob(job)
                     #limits = job.JobLimitGroups
@@ -214,7 +232,7 @@ def __main__():
             print("Done")
             os.system("pause")
 
-        elif choice == 8:
+        elif choice == 9:
             os.system("cls")
             print("When prompted for episode or shot numbers, only enter the number (119 instead of ep119 or 1 instead of sh0001 for example)")
             print("By default, stat files are located in " + os.environ['USERPROFILE'] + "\\Documents\\")
@@ -222,6 +240,6 @@ def __main__():
             print("Options 5 and 6 will look for all the BATCHER/preComp jobs for the episode currently filtered and fix their environment variables.")
             print("\n")
             os.system("pause")
-        elif choice == 9:
+        elif choice == 10:
             os.system("cls")
             break
