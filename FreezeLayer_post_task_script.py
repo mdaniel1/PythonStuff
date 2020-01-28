@@ -27,7 +27,7 @@ def __main__(*args):
 	currentJob = findJob(job, deadlinePlugin)
 
 	outputDirectory = currentJob.JobOutputDirectories[0]
-	outputName = currentJob.JobOutputFileNames[0]
+	outputName = currentJob.JobOutputFileNames[0] # Initial format has '####' instead of numbers
 
 	if deadlinePlugin.GetCurrentTaskId() == "0":
 		deadlinePlugin.LogStdout("This task is the first frame. Fetching amount of frames to copy...")
