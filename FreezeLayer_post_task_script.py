@@ -38,7 +38,7 @@ def __main__(*args):
 			deadlinePlugin.LogInfo("DEBUG : Copying first frame to " + pathToFile)
 			if os.name == "nt":
 				os.system("COPY "+outputDirectory+"\\"+outputName.replace("####", "{:04d}".format(100))+" "+ pathToFile)
-			else:
-				os.system("cp "+outputDirectory+"/"+outputName.replace("####", "{:04d}".format(100))+" "+outputDirectory+"/"+outputName.replace("####", "{:04d}".format(number)))
-				deadlinePlugin.LogStdout("End of copy")
+			#else:
+			#	os.system("cp "+outputDirectory+"/"+outputName.replace("####", "{:04d}".format(100))+" "+outputDirectory+"/"+outputName.replace("####", "{:04d}".format(number)))
+			#	deadlinePlugin.LogStdout("End of copy")
 	deadlinePlugin.LogInfo("---[ENDING POST-TASK SCRIPT]---")
