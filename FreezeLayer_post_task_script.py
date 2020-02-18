@@ -28,8 +28,8 @@ def __main__(*args):
         deadlinePlugin.LogStdout("This task is the first frame. Fetching amount of frames to copy...")
         frames = getFramesForJob(job)
         deadlinePlugin.LogStdout("Fetch OK, copying first frame " + str(frames-1) + " times.")
+        pathToInitialFile = os.path.normpath(os.path.join(outputDirectory, outputName.replace("####", "{:04d}".format(100))))
         for number in range(101, getFramesForJob(job)+100):
-            pathToInitialFile = os.path.normpath(os.path.join(outputDirectory, outputName.replace("####", "{:04d}".format(100))))
             pathToFile = os.path.normpath(os.path.join(outputDirectory, outputName.replace("####", "{:04d}".format(number))))
             deadlinePlugin.LogInfo("Copying first frame to " + pathToFile)
             fullCommand = command + pathToInitialFile + " " + pathToFile
@@ -39,3 +39,4 @@ def __main__(*args):
     else:
         deadlinePlugin.LogStdout("Nothing to do")
     deadlinePlugin.LogInfo("---[ENDING POST-TASK SCRIPT]---")
+
